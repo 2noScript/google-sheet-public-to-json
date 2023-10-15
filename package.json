@@ -1,0 +1,33 @@
+{
+  "name": "google-sheet-public-to-json",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  },
+  "keywords": [
+    "google spreadsheets",
+    "google sheets",
+    "google",
+    "spreadsheet",
+    "spreadsheets",
+    "sheets",
+    "gdata",
+    "api",
+    "googleapis",
+    "drive",
+    "google docs",
+    "google drive"
+  ],
+  "author": "2noScript",
+  "description": "Supports converting spreadsheets to json format",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2noScript/google-sheet-public-to-json"
+  }
+}
