@@ -6,24 +6,30 @@ import XLSX from "xlsx";
 export const getHeaderRowCount = (workbook) => {
   const sheetNameList = workbook.SheetNames;
   const sheet = workbook.Sheets[sheetNameList[0]];
+  const range = XLSX.utils.decode_range(sheet["!ref"]);
 
-  const headers = {};
-  let headerRowCount = 0;
+  let parsedNumHeaders = 0;
 
-  for (const cellAddress in sheet) {
-    if (cellAddress[0] === "!") continue;
-    const cell = sheet[cellAddress];
-    if (cell && cell.v) {
-      const header = cell.v.toString().trim();
-      if (!headers[cellAddress[0]]) {
-        headers[cellAddress[0]] = header;
-        headerRowCount++;
-      } else if (headers[cellAddress[0]] !== header) {
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    let isParsed = true;
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellAddress = { c: C, r: R };
+      const cellRef = XLSX.utils.encode_cell(cellAddress);
+      const cell = sheet[cellRef];
+
+      if (cell && cell.t === "n") {
+        isParsed = false;
         break;
       }
     }
+
+    if (isParsed) {
+      parsedNumHeaders++;
+    } else {
+      break;
+    }
   }
-  return headerRowCount;
+  return parsedNumHeaders;
 };
 
 const sheetPublicToJson = async (linkSheetPublic) => {
@@ -34,6 +40,7 @@ const sheetPublicToJson = async (linkSheetPublic) => {
   const workbook = XLSX.read(data, { type: "array" });
 
   const headerRowCount = getHeaderRowCount(workbook);
+  console.log(headerRowCount);
 
   const sheetNameList = workbook.SheetNames;
   const sheet = workbook.Sheets[sheetNameList[0]];
@@ -90,4 +97,8 @@ const sheetPublicToJson = async (linkSheetPublic) => {
   return dataJson;
 };
 
+const jsonData = await sheetPublicToJson(
+  "https://docs.google.com/spreadsheets/d/1vd2XOjo_dk069cEOUvGDAEKgnjdqcUMnbA_JaVbWboE/edit#gid=0"
+);
+console.log(jsonData);
 export default sheetPublicToJson;
