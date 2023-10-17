@@ -1,16 +1,19 @@
 {
   "name": "google-sheet-public-to-json",
   "version": "1.0.8",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon index",
-    "test": "nodemon test.js"
+    "dev": "tsc && nodemon lib",
+    "build": "tsc"
   },
   "dependencies": {
     "xlsx": "^0.18.5"
   },
-  "type": "module",
   "keywords": [
     "google spreadsheets",
     "google sheets",
@@ -32,6 +35,7 @@
     "url": "git+https://github.com/2noScript/google-sheet-public-to-json"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "typescript": "^5.2.2"
   }
 }
