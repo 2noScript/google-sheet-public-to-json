@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index"
+    "dev": "nodemon index",
+    "test": "nodemon test.js"
   },
   "dependencies": {
     "xlsx": "^0.18.5"
@@ -30,5 +30,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/2noScript/google-sheet-public-to-json"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

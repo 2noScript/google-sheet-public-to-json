@@ -1,7 +1,16 @@
-import { getUrlExcelSheet } from "./src/utils.js";
 import XLSX from "xlsx";
 
 //___________Developed by 2noscript_____________
+
+export function getUrlExcelSheet(url) {
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (match && match[1]) {
+    const sheetKey = match[1];
+    const baseUrl = url.split(sheetKey)[0];
+    return `${baseUrl}${sheetKey}/export?format=xlsx`;
+  }
+  return "ERROR";
+}
 
 export const getHeaderRowCount = (workbook) => {
   const sheetNameList = workbook.SheetNames;
@@ -16,7 +25,6 @@ export const getHeaderRowCount = (workbook) => {
       const cellAddress = { c: C, r: R };
       const cellRef = XLSX.utils.encode_cell(cellAddress);
       const cell = sheet[cellRef];
-
       if (cell && cell.t === "n") {
         isParsed = false;
         break;
@@ -40,8 +48,6 @@ const sheetPublicToJson = async (linkSheetPublic) => {
   const workbook = XLSX.read(data, { type: "array" });
 
   const headerRowCount = getHeaderRowCount(workbook);
-  console.log(headerRowCount);
-
   const sheetNameList = workbook.SheetNames;
   const sheet = workbook.Sheets[sheetNameList[0]];
   const range = XLSX.utils.decode_range(sheet["!ref"]);
@@ -55,30 +61,36 @@ const sheetPublicToJson = async (linkSheetPublic) => {
       const cell = sheet[cellRef];
       headers[C] = (headers[C] ? headers[C] : "") + (cell ? cell.v : "");
     }
-    let i = 0;
-    while (i < range.e.c) {
-      try {
-        if (headers[i] === "") headers[i] = headers[i - 1];
-      } catch {}
-      i++;
-    }
     headersArr.push(headers);
   }
 
-  const header = {};
+  let header = {};
   for (let i = 0; i < headersArr.length; i++) {
     for (const key in headersArr[i]) {
-      let textCurrentHeader = "";
-      if (headersArr[i][key] !== undefined && headersArr[i][key] !== "") {
-        textCurrentHeader =
-          i == 0 ? headersArr[i][key] : "." + headersArr[i][key];
+      if (i === 0) {
+        if (key == 0 || headersArr[i][key] !== "") {
+          header[key] = headersArr[i][key];
+        } else {
+          let k = 0;
+          while (headersArr[i][key - k] === "") {
+            header[key] = headersArr[i][key - k - 1];
+            k++;
+          }
+        }
+      } else {
+        if (headersArr[i][key] !== "") {
+          header[key] += "." + headersArr[i][key];
+        }
+        if (headersArr[i][key] === "") {
+          if (headersArr[0][key] === "") {
+            let k = 0;
+            while (headersArr[i][key - k] === "") {
+              header[key] += "." + headersArr[i][key - k - 1];
+              k++;
+            }
+          }
+        }
       }
-      header[key] =
-        header[key] !== undefined
-          ? header[key] + textCurrentHeader
-          : textCurrentHeader;
-      if (header[key].startsWith(""))
-        header[key] = header[key].replace("-", "");
     }
   }
   const dataJson = [];
@@ -98,6 +110,7 @@ const sheetPublicToJson = async (linkSheetPublic) => {
 };
 
 const jsonData = await sheetPublicToJson(
+  // "https://docs.google.com/spreadsheets/d/1K6HonBg-o2x0riE9_Ba-1hckJWl8Alg8-SXHjgT_ZWc/edit#gid=0"
   "https://docs.google.com/spreadsheets/d/1vd2XOjo_dk069cEOUvGDAEKgnjdqcUMnbA_JaVbWboE/edit#gid=0"
 );
 console.log(jsonData);
