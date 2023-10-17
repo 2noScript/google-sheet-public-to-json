@@ -12,9 +12,9 @@ export function getUrlExcelSheet(url: string) {
   return "ERROR";
 }
 
-export const getHeaderRowCount = (workbook: any) => {
+export const getHeaderRowCount = (workbook: XLSX.WorkBook) => {
   const sheetNameList = workbook.SheetNames;
-  const sheet = workbook.Sheets[sheetNameList[0]];
+  const sheet: any = workbook.Sheets[sheetNameList[0]];
   const range = XLSX.utils.decode_range(sheet["!ref"]);
 
   let parsedNumHeaders = 0;
@@ -40,49 +40,42 @@ export const getHeaderRowCount = (workbook: any) => {
   return parsedNumHeaders;
 };
 
-export default async function sheetPublicToJson(linkSheetPublic: string) {
+export const sheetPublicToJson = async (linkSheetPublic: string) => {
   const linkXLSX = getUrlExcelSheet(linkSheetPublic);
   const response = await fetch(linkXLSX);
   const arrayBuffer = await response.arrayBuffer();
   const data = new Uint8Array(arrayBuffer);
-  const workbook = XLSX.read(data, { type: "array" });
+  const workbook: XLSX.WorkBook = XLSX.read(data, { type: "array" });
 
   const headerRowCount = getHeaderRowCount(workbook);
   const sheetNameList = workbook.SheetNames;
   const sheet: any = workbook.Sheets[sheetNameList[0]];
   const range = XLSX.utils.decode_range(sheet["!ref"]);
-  const headersArr: any = [];
+  const headersArr = [];
 
   for (let R = range.s.r; R < headerRowCount; R++) {
     const headers: any = {};
-    let headerRowCount = 0;
-    for (const cellAddress in sheet) {
-      if (cellAddress[0] === "!") continue;
-      const cell = sheet[cellAddress];
-      if (cell && cell.v) {
-        const header = cell.v.toString().trim();
-        if (!headers[cellAddress[0]]) {
-          headers[cellAddress[0]] = header;
-          headerRowCount++;
-        } else if (headers[cellAddress[0]] !== header) {
-          break;
-        }
-      }
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellAddress = { c: C, r: R };
+      const cellRef = XLSX.utils.encode_cell(cellAddress);
+      const cell = sheet[cellRef];
+
+      headers[C] = (headers[C] ? headers[C] : "") + (cell ? cell.v : "");
     }
     headersArr.push(headers);
   }
 
   let header: any = {};
   for (let i = 0; i < headersArr.length; i++) {
-    for (const key in headersArr[i]) {
-      const index = Number(key);
+    for (const index in headersArr[i]) {
+      const key: number = Number(index);
       if (i === 0) {
-        if (index === 0 || headersArr[i][key] !== "") {
+        if (key == 0 || headersArr[i][key] !== "") {
           header[key] = headersArr[i][key];
         } else {
           let k = 0;
-          while (headersArr[i][index - k] === "") {
-            header[key] = headersArr[i][index - k - 1];
+          while (headersArr[i][key - k] === "") {
+            header[key] = headersArr[i][key - k - 1];
             k++;
           }
         }
@@ -93,8 +86,8 @@ export default async function sheetPublicToJson(linkSheetPublic: string) {
         if (headersArr[i][key] === "") {
           if (headersArr[0][key] === "") {
             let k = 0;
-            while (headersArr[i][index - k] === "") {
-              header[key] += "." + headersArr[i][index - k - 1];
+            while (headersArr[i][key - k] === "") {
+              header[key] += "." + headersArr[i][key - k - 1];
               k++;
             }
           }
@@ -102,7 +95,7 @@ export default async function sheetPublicToJson(linkSheetPublic: string) {
       }
     }
   }
-  const dataJson = [];
+  const dataJson: any = [];
 
   for (let R = 3; R <= range.e.r; R++) {
     const row: any = {};
@@ -116,7 +109,4 @@ export default async function sheetPublicToJson(linkSheetPublic: string) {
   }
 
   return dataJson;
-}
-sheetPublicToJson(
-  "https://docs.google.com/spreadsheets/d/1vd2XOjo_dk069cEOUvGDAEKgnjdqcUMnbA_JaVbWboE/edit#gid=0"
-).then((data) => console.log(data));
+};
