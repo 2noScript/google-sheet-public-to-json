@@ -97,7 +97,7 @@ export const sheetPublicToJson = async (linkSheetPublic: string) => {
   }
   const dataJson: any = [];
 
-  for (let R = 3; R <= range.e.r; R++) {
+  for (let R = headerRowCount; R <= range.e.r; R++) {
     const row: any = {};
     for (let C = range.s.c; C <= range.e.c; C++) {
       const cellAddress = { c: C, r: R };
@@ -110,3 +110,7 @@ export const sheetPublicToJson = async (linkSheetPublic: string) => {
 
   return dataJson;
 };
+
+sheetPublicToJson(
+  "https://docs.google.com/spreadsheets/d/1K6HonBg-o2x0riE9_Ba-1hckJWl8Alg8-SXHjgT_ZWc/edit#gid=0"
+).then((data) => console.log(data[0]));

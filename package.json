@@ -1,6 +1,6 @@
 {
   "name": "google-sheet-public-to-json",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
