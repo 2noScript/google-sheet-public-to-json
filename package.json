@@ -8,8 +8,9 @@
   ],
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && nodemon lib",
-    "build": "tsc"
+    "dev": "nodemon --exec  ts-node  src/index.ts",
+    "build": "tsc",
+    "prepare": "yarn  build"
   },
   "dependencies": {
     "xlsx": "^0.18.5"
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2"
   }
 }
